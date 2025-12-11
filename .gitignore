@@ -1,9 +1,26 @@
-target/
+# Gradle files
+.gradle/
 build/
-*.class
+!gradle/wrapper/gradle-wrapper.jar
+*.lock
+
+# Build output
+target/
+out/
+
+# IDE files
 .idea/
 *.iml
+*.iws
 .vscode/
+
+# OS files
 .DS_Store
+Thumbs.db
+
+# Application secrets
+application-local.properties
+
+# Logs
 logs/
 *.log
