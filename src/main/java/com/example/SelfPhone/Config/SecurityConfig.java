@@ -13,6 +13,7 @@ import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.oauth2.server.resource.web.authentication.BearerTokenAuthenticationFilter;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
@@ -26,6 +27,8 @@ public class SecurityConfig {
 
     @Autowired
     checkValidToken checkValidToken;
+    @Autowired
+    RateLimitFilter rateLimitFilter;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
@@ -40,6 +43,8 @@ public class SecurityConfig {
         httpSecurity.oauth2ResourceServer(auth -> auth.jwt(jwtConfigurer -> jwtConfigurer.decoder(jwtDecoder())));
 
         httpSecurity.addFilterBefore(checkValidToken, BearerTokenAuthenticationFilter.class);
+
+        httpSecurity.addFilterBefore(rateLimitFilter, UsernamePasswordAuthenticationFilter.class);
 
         httpSecurity.csrf(AbstractHttpConfigurer::disable);
         return httpSecurity.build();
