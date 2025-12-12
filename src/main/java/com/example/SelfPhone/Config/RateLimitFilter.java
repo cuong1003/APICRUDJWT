@@ -24,14 +24,14 @@ public class RateLimitFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,
-                                    HttpServletResponse response,
-                                    FilterChain filterChain)
+            HttpServletResponse response,
+            FilterChain filterChain)
             throws ServletException, IOException {
         String authHeader = request.getHeader("Authorization");
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
             String token = authHeader.substring(7);
             Integer userId = userRepository.findRoleByUsername(jwtSerice.getUsernameInToken(token)).getId();
-            if(!rateLimitService.isAllowedToRateLimit(userId)) {
+            if (!rateLimitService.isAllowedToRateLimit(userId)) {
                 response.setStatus(429);
                 response.setContentType("application/json");
                 response.getWriter().write("{\"error\": \"Too many requests. Please try again later.\"}");
