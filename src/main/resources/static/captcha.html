@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>CAPTCHA</title>
+    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin: 0;
+        }
+
+        .container {
+            background: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            text-align: center;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        button {
+            margin-top: 20px;
+            padding: 12px 30px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        button:hover {
+            background: #764ba2;
+        }
+
+        .message {
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 5px;
+            display: none;
+        }
+
+        .success {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Xac thuc robot</h1>
+
+        <div class="g-recaptcha" data-sitekey="6LeTMSksAAAAAPWiixmT1RtLkU1biagbboK6wR_9"></div>
+
+        <button onclick="verify()">Xac nhan</button>
+
+        <div class="message" id="message"></div>
+    </div>
+
+    <script>
+        function verify() {
+            const token = grecaptcha.getResponse();
+            const messageDiv = document.getElementById('message');
+
+            if (token.length === 0) {
+                messageDiv.textContent = 'Vui long xac nhan captcha!';
+                messageDiv.className = 'message error';
+                messageDiv.style.display = 'block';
+                return;
+            }
+
+            // Gửi token lên backend để verify
+            fetch('/api/verify-captcha', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ token: token })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        messageDiv.textContent = '' + data.message;
+                        messageDiv.className = 'message success';
+                        messageDiv.style.display = 'block';
+
+                        // Reset captcha sau khi thành công
+                        grecaptcha.reset();
+                    } else {
+                        messageDiv.textContent = data.message;
+                        messageDiv.className = 'message error';
+                        messageDiv.style.display = 'block';
+
+                        // Reset captcha để thử lại
+                        grecaptcha.reset();
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    messageDiv.textContent = 'Co loi xay ra: ' + error.message;
+                    messageDiv.className = 'message error';
+                    messageDiv.style.display = 'block';
+                });
+        }
+    </script>
+</body>
+
+</html>
