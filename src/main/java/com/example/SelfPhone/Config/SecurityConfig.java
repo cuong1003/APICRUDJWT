@@ -34,8 +34,10 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
         httpSecurity.authorizeHttpRequests(x -> x
                 .requestMatchers(HttpMethod.POST, "/auth/login").permitAll()
-                .requestMatchers(HttpMethod.GET, "/captcha.html").permitAll()
-                .requestMatchers(HttpMethod.POST, "/api/verify-captcha").permitAll()
+                .requestMatchers(HttpMethod.GET, "/generateCaptcha.html").permitAll()
+                .requestMatchers(HttpMethod.POST, "/api/google-captcha").permitAll()
+                .requestMatchers(HttpMethod.GET, "/captcha").permitAll()
+                .requestMatchers(HttpMethod.POST, "/captcha").permitAll()
                 .requestMatchers(HttpMethod.POST, "/phones/add/**").hasAuthority("SCOPE_ADMIN")
                 .requestMatchers(HttpMethod.PUT, "/phones/update/**").hasAuthority("SCOPE_ADMIN")
                 .requestMatchers(HttpMethod.DELETE, "/phones/delete/**").hasAuthority("SCOPE_ADMIN")

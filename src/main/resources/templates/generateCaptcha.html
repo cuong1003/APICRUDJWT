@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <title>CAPTCHA Renderere</title>
+</head>
+
+<body>
+
+    <h1>Xác minh CAPTCHA</h1>
+
+    <canvas id="captchaCanvas" width="200" height="50" style="border: 1px solid black;"></canvas>
+
+    <div th:if="${successMessage}"
+        style="color: green; border: 1px solid green; padding: 10px; margin: 10px 0; border-radius: 5px; background-color: #d4edda;">
+        <span th:text="${successMessage}"></span>
+    </div>
+
+    <div th:if="${errorMessage}"
+        style="color: #721c24; border: 1px solid #f5c6cb; padding: 10px; margin: 10px 0; border-radius: 5px; background-color: #f8d7da;">
+        <span th:text="${errorMessage}"></span>
+    </div>
+
+    <form action="/captcha" method="post">
+        <div style="margin-top: 10px;">
+            <label for="captchaInput"></label><input type="text" name="captchaInput" id="captchaInput"
+                placeholder="Nhập mã xác minh" maxlength="6" required>
+        </div>
+        <button type="submit">Xác nhận</button>
+    </form>
+    <p id="message">Đang vẽ CAPTCHA...</p>
+
+    <script>
+        const CAPTCHA_WIDTH = 200;
+        const CAPTCHA_HEIGHT = 50;
+        const binaryStringFromBackend = '[[${binaryCaptcha}]]';
+
+        document.addEventListener('DOMContentLoaded', () => {
+            if (binaryStringFromBackend && binaryStringFromBackend.length > 0) {
+                drawBinaryCaptcha(binaryStringFromBackend, CAPTCHA_WIDTH, CAPTCHA_HEIGHT);
+                document.getElementById('message').textContent = 'Vui lòng nhập mã xác minh.';
+            } else {
+                document.getElementById('message').textContent = 'LỖI: Không nhận được chuỗi Binary CAPTCHA từ Backend.';
+            }
+        });
+        function drawBinaryCaptcha(binaryData, width, height) {
+            const canvas = document.getElementById('captchaCanvas');
+            const ctx = canvas.getContext('2d');
+
+            canvas.width = width;
+            canvas.height = height;
+            ctx.clearRect(0, 0, width, height);
+
+            if (binaryData.length !== width * height) {
+                console.error("Dữ liệu nhị phân không khớp với kích thước Canvas.");
+                document.getElementById('message').textContent = 'LỖI DỮ LIỆU: Kích thước không khớp.';
+                return;
+            }
+
+            const imageData = ctx.createImageData(width, height);
+            const data = imageData.data; // Mảng RGBA (4 phần tử/pixel)
+
+            for (let i = 0; i < binaryData.length; i++) {
+                const value = parseInt(binaryData[i]); // 0 hoặc 1
+                const dataIndex = i * 4;
+
+                // Nếu là '1' (Màu tối: Đen)
+                if (value === 1) {
+                    data[dataIndex] = 0; data[dataIndex + 1] = 0; data[dataIndex + 2] = 0; data[dataIndex + 3] = 255;
+                }
+                // Nếu là '0' (Màu sáng: Trắng)
+                else {
+                    data[dataIndex] = 255; data[dataIndex + 1] = 255; data[dataIndex + 2] = 255; data[dataIndex + 3] = 255;
+                }
+            }
+
+            ctx.putImageData(imageData, 0, 0);
+        }
+    </script>
+
+</body>
+
+</html>
